@@ -8,7 +8,7 @@ class Buku extends Model
 {
     protected $DBGroup          = 'default';
     protected $table            = 'tb_buku';
-    protected $primaryKey       = 'id';
+    protected $primaryKey       = 'kd_buku';
     protected $useAutoIncrement = true;
     protected $insertID         = 0;
     protected $returnType       = 'array';

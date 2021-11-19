@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\Buku as ModelsBuku;
 use CodeIgniter\RESTful\ResourceController;
 
-class Buku extends ResourceController
+class Buku extends BaseController
 {
     /**
      * Return an array of resource objects, themselves in array format
@@ -23,12 +23,12 @@ class Buku extends ResourceController
 
     public function index()
     {
-        // $data['buku'] = $this->buku->findAll();
-        // return view('buku/index',$data);
-        // return view('buku/add');
+        $data['buku'] = $this->buku->findAll();
+        return view('buku/index',$data);
         // dd($data);
         
-        return $this->respond($this->buku->findAll());
+        // If Using API
+        // return $this->respond($this->buku->findAll());
     }
 
     /**
@@ -48,6 +48,7 @@ class Buku extends ResourceController
      */
     public function new()
     {
+        return view('buku/add');
        
     }
 
@@ -56,9 +57,52 @@ class Buku extends ResourceController
      *
      * @return mixed
      */
-    public function create()
+    public function store()
     {
         try {
+
+            if(!$this->validate([
+                'kd_buku' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Nama Harus di Isi !'
+                    ]
+                ],
+                'judul_buku' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Judul Buku Harus di Isi !'
+                    ]
+                ],
+                'penulis' =>[
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Penulis Harus di Isi !'
+                    ]
+                ],
+                'penerbit' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Penerbit Harus di Isi !'
+                    ]
+                ],
+                'tahun_terbit' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Tahun Terbit Harus di Isi !'
+                    ]
+                ],
+                'harga' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Harga Harus di Isi !'
+                    ]
+                ],
+            ])){
+                session()->setFlashdata('error',$this->validator->listErrors());
+                return redirect()->back();
+            }
+
             $query = $this->buku->insert([
                 'kd_buku' => $this->request->getVar('kd_buku'),
                 'judul_buku' => $this->request->getVar('judul_buku'),
@@ -68,9 +112,12 @@ class Buku extends ResourceController
                 'harga' => $this->request->getVar('harga'),
             ]);
             if($query){
-                $this->respondCreated([
-                    'status' => '200'
-                ],'Data Berhasil di Masukan');
+                
+                // // Api Mode
+                // $this->respondCreated([
+                //     'status' => '200'
+                // ],'Data Berhasil di Masukan');    
+                return redirect()->to('/buku');
             }
 
         } catch (\Throwable $th) {
@@ -83,9 +130,10 @@ class Buku extends ResourceController
      *
      * @return mixed
      */
-    public function edit($id = null)
+    public function edit($id)
     {
-        //
+        $data['buku'] = $this->buku->where('kd_buku', $id)->first();
+        return view('buku/edit',$data);
     }
 
     /**
@@ -93,18 +141,42 @@ class Buku extends ResourceController
      *
      * @return mixed
      */
-    public function update($id = null)
+    public function update($id)
     {
-        //
+        try {
+            $query = $this->buku->update($id,[
+                'kd_buku' => $this->request->getVar('kd_buku'),
+                'judul_buku' => $this->request->getVar('judul_buku'),
+                'penulis' => $this->request->getVar('penulis'),
+                'penerbit' => $this->request->getVar('penerbit'),
+                'tahun_terbit' => $this->request->getVar('tahun_terbit'),
+                'harga' => $this->request->getVar('harga'),
+            ]);
+            if($query){
+                
+                // // Api Mode
+                // $this->respondCreated([
+                //     'status' => '200'
+                // ],'Data Berhasil di Masukan');    
+                return redirect()->to('/buku');
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
-    /**
-     * Delete the designated resource object from the model
-     *
-     * @return mixed
-     */
-    public function delete($id = null)
+
+    public function delete($kd_buku)
     {
-        //
+        // Check
+        $check = $this->buku->where('kd_buku',$kd_buku);
+        if(empty($check)){
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data Tidak Ditemukan');
+        };
+
+
+        $this->buku->where('kd_buku', $kd_buku)->delete();
+        return redirect()->to('/buku');
     }
 }

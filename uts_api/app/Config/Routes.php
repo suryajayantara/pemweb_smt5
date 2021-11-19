@@ -32,7 +32,17 @@ $routes->setAutoRoute(true);
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
-$routes->resource('buku');
+// $routes->resource('buku');
+
+$routes->group('buku', function ($routes) {
+    $routes->get('/', 'Buku::index',['as' => 'buku_index']);
+    $routes->get('new', 'Buku::new',['as' => 'buku_new']);
+    $routes->get('delete/(:num)', 'Buku::delete/$1',['as' => 'buku_delete']);
+    $routes->post('store', 'Buku::store',['as' => 'buku_store']);
+    $routes->get('edit/(:num)', 'Buku::edit/$1',['as' => 'buku_edit']);
+    $routes->get('update/(:num)', 'Buku::update/$1',['as' => 'buku_update']);
+});
+
 
 /*
  * --------------------------------------------------------------------
